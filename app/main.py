@@ -3,6 +3,7 @@ from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadF
 from app.analysis_service import analyze_image_bytes
 from app.batch_processor import process_todoist_folder
 from app.config import Settings, get_settings
+from app.log_store import append_error_log
 from app.mailer import send_email_smtp
 from app.models import AnalyzeResult, BatchProcessResponse, SendEmailRequest, SendEmailResponse
 
@@ -74,8 +75,16 @@ def send(
             to_email=str(payload.to_email),
             subject=payload.subject,
             body=payload.body,
+            job_language="manual",
         )
     except Exception as exc:
+        append_error_log(
+            settings=settings,
+            source="api_send",
+            message=str(exc),
+            file_name=None,
+            moved_to=None,
+        )
         raise HTTPException(status_code=500, detail=f"Send failed: {exc}") from exc
 
     return SendEmailResponse(
@@ -108,8 +117,14 @@ async def process_and_send(
                 to_email=str(result.extracted_email),
                 subject=result.subject,
                 body=result.body,
+                job_language=result.detected_language,
             )
         except Exception as exc:
+            append_error_log(
+                settings=settings,
+                source="api_process_and_send",
+                message=str(exc),
+            )
             raise HTTPException(status_code=500, detail=f"Send failed: {exc}") from exc
 
     return result
@@ -134,6 +149,16 @@ def process_todoist(
             only_email=only_email,
         )
     except ValueError as exc:
+        append_error_log(
+            settings=settings,
+            source="api_process_todoist",
+            message=str(exc),
+        )
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
+        append_error_log(
+            settings=settings,
+            source="api_process_todoist",
+            message=str(exc),
+        )
         raise HTTPException(status_code=500, detail=f"Batch processing failed: {exc}") from exc

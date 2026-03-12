@@ -9,6 +9,7 @@ from pydantic import EmailStr, TypeAdapter, ValidationError
 
 from app.analysis_service import analyze_image_bytes
 from app.config import Settings
+from app.log_store import append_error_log
 from app.mailer import send_email_smtp
 from app.models import BatchFileResult, BatchProcessResponse
 
@@ -83,6 +84,13 @@ def process_todoist_folder(
             if not target_email:
                 errors += 1
                 moved_to = _move_with_collision(file_path, error_dir)
+                append_error_log(
+                    settings=settings,
+                    source="process_todoist_folder",
+                    message="no_email_found_in_image",
+                    file_name=file_path.name,
+                    moved_to=str(moved_to),
+                )
                 _append_registry_entry(
                     registry_file=registry_file,
                     file_hash=file_hash,
@@ -113,6 +121,7 @@ def process_todoist_folder(
                     to_email=target_email,
                     subject=analyzed.subject,
                     body=analyzed.body,
+                    job_language=analyzed.detected_language,
                 )
                 sent = True
                 sent_emails += 1
@@ -148,6 +157,13 @@ def process_todoist_folder(
             moved_to = None
             if file_path.exists():
                 moved_to = _move_with_collision(file_path, error_dir)
+            append_error_log(
+                settings=settings,
+                source="process_todoist_folder",
+                message=str(exc),
+                file_name=file_path.name,
+                moved_to=str(moved_to) if moved_to else None,
+            )
             _append_registry_entry(
                 registry_file=registry_file,
                 file_hash=file_hash,

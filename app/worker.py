@@ -8,6 +8,7 @@ import time
 
 from app.batch_processor import process_todoist_folder
 from app.config import get_settings
+from app.log_store import append_error_log
 
 
 class Spinner:
@@ -56,6 +57,11 @@ def run_once(
                 only_email=only_email,
             )
     except Exception as exc:
+        append_error_log(
+            settings=settings,
+            source="worker_run_once",
+            message=str(exc),
+        )
         print(f"[ERRO] Falha ao processar lote: {exc}")
         return 1
 

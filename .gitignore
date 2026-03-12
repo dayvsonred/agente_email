@@ -56,6 +56,7 @@ dkms.conf
 
 # Local runtime data and secrets
 data/**
+log/**
 .env
 
 # Python

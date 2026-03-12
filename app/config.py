@@ -15,6 +15,25 @@ class Settings(BaseSettings):
     smtp_password: str | None = Field(default=None, alias="SMTP_PASSWORD")
     smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
     from_email: str | None = Field(default=None, alias="FROM_EMAIL")
+    smtp_auth_mode: str = Field(default="password", alias="SMTP_AUTH_MODE")
+
+    gmail_oauth2_client_id: str | None = Field(default=None, alias="GMAIL_OAUTH2_CLIENT_ID")
+    gmail_oauth2_client_secret: str | None = Field(
+        default=None,
+        alias="GMAIL_OAUTH2_CLIENT_SECRET",
+    )
+    gmail_oauth2_refresh_token: str | None = Field(
+        default=None,
+        alias="GMAIL_OAUTH2_REFRESH_TOKEN",
+    )
+    gmail_oauth2_access_token: str | None = Field(
+        default=None,
+        alias="GMAIL_OAUTH2_ACCESS_TOKEN",
+    )
+    gmail_oauth2_token_uri: str = Field(
+        default="https://oauth2.googleapis.com/token",
+        alias="GMAIL_OAUTH2_TOKEN_URI",
+    )
 
     cv_file: Path = Field(default=Path("data/cv.txt"), alias="CV_FILE")
     cv_file_pt: Path = Field(default=Path("data/cv-pt.txt"), alias="CV_FILE_PT")
@@ -22,6 +41,7 @@ class Settings(BaseSettings):
     todoist_dir: Path = Field(default=Path("data/todoist"), alias="TODOIST_DIR")
     done_dir: Path = Field(default=Path("data/done"), alias="DONE_DIR")
     error_send_dir: Path = Field(default=Path("data/errosend"), alias="ERRORSEND_DIR")
+    log_dir: Path = Field(default=Path("log"), alias="LOG_DIR")
     processed_registry_file: Path = Field(
         default=Path("data/processed_files.txt"),
         alias="PROCESSED_REGISTRY_FILE",
